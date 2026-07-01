@@ -1,0 +1,19 @@
+I’m tracing the auth/session code path first so I can identify the exact one-hour cutoff and verify whether it’s token-expiry logic, cookie config, or a time-unit mismatch.
+
+I’m narrowing this to the auth middleware implementation and the session timestamp check so I can test one concrete hypothesis about the one-hour cutoff.
+
+Searched for regex `auth middleware|session.*hour|maxAge|expires|exp\b|ttl|3600|one hour` (`**/*.{ts,js,tsx,jsx,mjs,cjs,json,md}`), 47 results
+
+Read memory
+
+The repo doesn’t contain a real auth middleware for this prompt; it appears in the Token Kit measurement set as a debugging-example question, so I’m checking the nearby examples to infer the intended diagnosis pattern rather than inventing a code-specific answer.
+
+Read [](file://./.github/copilot-instructions.md)
+
+Read [](file://./measurement/direct-answer-snapshot.example.json)
+
+Read [](file://./measurement/before-after-examples.md#150-150), lines 150 to 188
+
+The likely root cause is an expiry-boundary bug, not a random session failure. “After exactly one hour” usually means the middleware is rejecting the session at the precise `exp` cutoff because the comparison is wrong for the token format or timestamp rounding, typically an off-by-one check such as treating `now === exp` as already invalid when the rest of the stack still considers it valid.
+
+The smallest plausible fix is to change the expiry check so it only rejects once the current time is strictly past the expiry boundary, and make sure both sides use the same unit. In practice that usually means fixing a comparison like `now >= exp` or `age >= 3600` to the correct boundary for your token contract, often `now > exp`, or changing a mismatched `<`/`<=` pair in the validation branch. If the code mixes milliseconds and seconds, normalize that first, because a boundary bug plus unit mismatch is the other common exact-one-hour failure.

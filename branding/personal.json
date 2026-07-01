@@ -1,0 +1,8 @@
+{
+  "edition": "personal",
+  "publisher": "ivan-stepantsov",
+  "displayName": "Certance Token Kit",
+  "description": "Cut your GitHub Copilot token bill, locally: compress context, redact and scan for secrets, and export audit evidence. No cloud, no external calls.",
+  "owner": "Ivan Stepantsov",
+  "license": "MIT"
+}

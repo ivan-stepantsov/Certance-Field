@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "metadata": {
+    "source": "local",
+    "provider": null,
+    "organization": null,
+    "repositoryId": null,
+    "repositoryName": null,
+    "createdAt": "2026-06-07T15:41:54.301Z",
+    "updatedAt": "2026-06-07T15:41:54.301Z",
+    "languages": [
+      "JSON",
+      "Javascript",
+      "Markdown",
+      "Shell",
+      "TypeScript",
+      "YAML"
+    ]
+  },
+  "tools": [
+    {
+      "toolId": "ESLint9",
+      "localConfigurationFile": "eslint.config.js",
+      "useLocalConfigurationFile": true,
+      "patterns": []
+    }
+  ],
+  "exclude": [
+    "node_modules/**",
+    "vscode-extension/node_modules/**",
+    "dist/**",
+    "build/**",
+    "out/**",
+    "coverage/**",
+    "vscode-extension/*.vsix",
+    "package-lock.json",
+    "vscode-extension/package-lock.json",
+    "**/__snapshots__/**",
+    "**/*.snap",
+    "**/test-data/**",
+    "**/*.csv",
+    "measurement/**",
+    "research/**",
+    "profiles/**"
+  ]
+}

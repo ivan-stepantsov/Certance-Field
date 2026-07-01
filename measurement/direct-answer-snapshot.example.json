@@ -1,0 +1,120 @@
+{
+  "results": [
+    {
+      "id": "auth-debug",
+      "variants": {
+        "baseline": {
+          "output": "The likely issue is an off-by-one token expiry check in the auth middleware. Check whether the code uses `<` instead of `<=`, then rerun the auth tests.",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": null,
+          "notes": "Baseline sample"
+        },
+        "concise": {
+          "output": "Likely off-by-one token expiry check. Compare `<` vs `<=` and rerun auth tests.",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": null,
+          "notes": "Shorter, still clear"
+        },
+        "directDefault": {
+          "output": "Auth expiry check is likely off by one. Change `<` to `<=` if confirmed, then rerun auth tests.",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": null,
+          "notes": "Target style"
+        }
+      }
+    },
+    {
+      "id": "destructive-warning",
+      "variants": {
+        "baseline": {
+          "output": "Do not run it directly in production. Dropping and recreating the users table is destructive and can permanently remove data. Verify backups and use a reversible migration plan first.",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": true,
+          "notes": "Safety case"
+        },
+        "concise": {
+          "output": "Do not run it in production. It drops user data. Verify backups and use a reversible migration first.",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": true,
+          "notes": "Still expanded because safety matters"
+        },
+        "directDefault": {
+          "output": "Do not run it in production. It will drop user data. Verify backups, then use a reversible migration plan.",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": true,
+          "notes": "Direct, not telegraphic"
+        }
+      }
+    },
+    {
+      "id": "review-risk",
+      "variants": {
+        "baseline": {
+          "outputFile": "direct-answer-captures/review-risk.baseline.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": false,
+          "notes": "Scored from capture"
+        },
+        "concise": {
+          "outputFile": "direct-answer-captures/review-risk.concise.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": false,
+          "notes": "Scored from capture"
+        },
+        "directDefault": {
+          "outputFile": "direct-answer-captures/review-risk.direct-default.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": false,
+          "notes": "Scored from capture"
+        }
+      }
+    },
+    {
+      "id": "setup-guidance",
+      "variants": {
+        "baseline": {
+          "outputFile": "direct-answer-captures/setup-guidance.baseline.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": false,
+          "notes": "Scored from capture"
+        },
+        "concise": {
+          "outputFile": "direct-answer-captures/setup-guidance.concise.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": false,
+          "notes": "Scored from capture"
+        },
+        "directDefault": {
+          "outputFile": "direct-answer-captures/setup-guidance.direct-default.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": false,
+          "notes": "Scored from capture"
+        }
+      }
+    }
+  ]
+}

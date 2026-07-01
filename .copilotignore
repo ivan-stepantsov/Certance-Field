@@ -1,0 +1,87 @@
+# Certance Token Kit — .copilotignore
+#
+# ROLE: Layer 2 — version-controlled convention for agent-mode enforcement.
+#
+# This file is NOT a first-class GitHub Copilot platform feature.
+# GitHub Copilot does not read .copilotignore natively for IDE completions,
+# Chat, or standard context exclusion. The platform-level mechanism is
+# configured in GitHub repository/organisation settings or via the REST API.
+# See .github/copilot-content-exclusion.yml for the authoritative pattern list
+# and instructions on applying it through GitHub settings or the API.
+#
+# WHAT THIS FILE DOES:
+# - Serves as a version-controlled, code-reviewable record of intended exclusions.
+# - Pairs with AGENTS.md (Layer 3) to close the agent-mode gap where GitHub's
+#   standard content exclusion does not apply (Agent Mode, Copilot CLI,
+#   Cloud Agents).
+# - Can be read by custom PreToolUse hooks to enforce exclusions at runtime
+#   in agentic workflows if your team implements that layer.
+# - Aligns with .gitignore and .vscode/settings.json so the intent is visible
+#   across all three developer-facing config surfaces.
+#
+# ENTERPRISE POSTURE:
+# For guaranteed exclusion across all Copilot surfaces, organisations on
+# Copilot Business or Enterprise must configure Layer 1 (GitHub settings/API).
+# This file alone is not sufficient for compliance or security governance.
+#
+# References:
+#   https://docs.github.com/en/copilot/concepts/context/content-exclusion
+#   https://github.com/orgs/community/discussions/10305 (open since 2022, unresolved)
+#   https://blog.cloud-eng.nl/2026/03/13/copilot-content-exclusions-four-layers/
+#
+# Keep this file in sync with .github/copilot-content-exclusion.yml.
+
+# --- Dependencies ---
+node_modules/
+.pnp
+.pnp.js
+
+# --- Build and compile output ---
+dist/
+build/
+out/
+.next/
+.nuxt/
+coverage/
+*.tsbuildinfo
+
+# --- Test and runtime artifacts ---
+playwright-report/
+test-results/
+allure-results/
+allure-report/
+blob-report/
+screenshots/
+videos/
+traces/
+*.png
+*.webp
+
+# --- Snapshots and generated fixtures ---
+__snapshots__/
+*.snap
+test-data/
+fixtures/data/
+
+# --- Lock files ---
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
+# --- Logs ---
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Generated and local-only noise ---
+*.csv
+.env
+.env.*
+.DS_Store
+
+# --- IDE internals ---
+.idea/
+.vscode/extensions.json

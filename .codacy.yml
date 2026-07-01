@@ -1,0 +1,54 @@
+---
+# Codacy configuration — Certance Token Kit
+# Docs: https://docs.codacy.com/repositories-configure/codacy-configuration-file/
+
+engines:
+  # JavaScript/TypeScript static analysis — powered by ESLint
+  eslint:
+    enabled: true
+
+  # Duplication detection — flag repeated logic across compression modules
+  duplication:
+    enabled: true
+    minTokens: 20        # lower than default; compression fns are deliberately small
+
+  # Disable tools with no value for this stack
+  pylint:
+    enabled: false
+  rubocop:
+    enabled: false
+  pmd:
+    enabled: false
+  checkstyle:
+    enabled: false
+
+exclude_paths:
+  # Dependencies
+  - "node_modules/**"
+  - "vscode-extension/node_modules/**"
+
+  # Build output
+  - "dist/**"
+  - "build/**"
+  - "out/**"
+  - "coverage/**"
+
+  # VS Code extension package
+  - "vscode-extension/*.vsix"
+
+  # Lock files — no value in linting these
+  - "package-lock.json"
+  - "vscode-extension/package-lock.json"
+
+  # Test snapshots and generated data (mirrors AGENTS.md exclusions)
+  - "**/__snapshots__/**"
+  - "**/*.snap"
+  - "**/test-data/**"
+  - "**/*.csv"
+
+  # Measurement and research assets — prose, not code
+  - "measurement/**"
+  - "research/**"
+
+  # Profiles — JSON config, not source code
+  - "profiles/**"

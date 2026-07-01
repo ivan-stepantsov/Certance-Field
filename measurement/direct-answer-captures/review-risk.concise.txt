@@ -1,0 +1,69 @@
+I’m checking the actual changed surface first so I can identify the highest behavioral risk from the diff rather than infer it from the failing command.
+
+Ran terminal command:  pwd && git status --short && git --no-pager diff --stat && git --no-pager diff -- package.json scripts/validate-direct-answers.js measurement/direct-answer-snapshot.capture.json measurement/direct-answer-validation.md README.md SETUP.md playbook.md
+
+Read memory
+
+I have the diff snapshot; next I’m narrowing to the touched files and the failing validation path so the review points at one concrete behavior, not a broad summary.
+
+Read [](file://~/Library/Application%20Support/Code/User/workspaceStorage/cdd6ec27b3aa27722fbedbe2c60e5726/GitHub.copilot-chat/chat-session-resources/fbb4ad3e-2119-4d17-b79c-aca93b66627d/call_Vj4SYRCCLdRXDPIRD20rtNjX__vscode-1780573887577/content.txt#1-1), lines 1 to 260
+
+The changed surface is broad, but the new behavior is concentrated in prompt assembly and the direct-answer validator. I’m reading those files next because they are the highest-probability source of a user-visible regression.
+
+Read [](file://./scripts/lib/prompt-optimizer.js)
+
+Read [](file://./scripts/validate-direct-answers.js)
+
+Read [](file://./scripts/lib/prompt-assemble.js)
+
+Read [](file://./scripts/lib/prompt-selection.js)
+
+Read [](file://./scripts/lib/prompt-normalize.js)
+
+Read [](file://./scripts/lib/prompt-shape.js)
+
+I’ve isolated the new prompt-rewrite pipeline. The main risk is likely in how it rewrites user intent, so I’m checking the failing validator input and the parity tests to see whether that risk is already exposed or still untested.
+
+Read [](file://./measurement/direct-answer-snapshot.capture.json)
+
+Read [](file://./measurement/direct-answer-prompt-set.json)
+
+Read [](file://./vscode-extension/test/module-parity.test.cjs)
+
+Read [](file://./vscode-extension/test/module-boundaries.test.cjs)
+
+Read [](file://./vscode-extension/test/prompt-optimizer.test.cjs)
+
+The validator input itself looks fine. I’m tracing where the rewritten prompt now reaches users so I can separate a docs-only change from an actual behavior change in the extension.
+
+Read [](file://./vscode-extension/src/extension.cjs#1-1), lines 1 to 260
+
+Read [](file://./vscode-extension/src/renderers.cjs)
+
+Read [](file://./scripts/compress.js)
+
+Read [](file://./scripts/lib/engine.js)
+
+Read [](file://./scripts/lib/prompt-warnings.js)
+
+I’ve found one likely semantic regression in prompt rewriting, but I want one cheap disconfirming check: whether the validator failure is unrelated plumbing or actually a symptom of the same change.
+
+Ran terminal command:  node scripts/validate-direct-answers.js --snapshot measurement/direct-answer-snapshot.capture.json
+
+The validator itself runs, so the review should stay on user-facing behavior. I’m comparing the old and new optimizer path now to confirm whether the change started dropping concrete selection detail.
+
+Ran terminal command:  git --no-pager diff -- scripts/lib/prompt-optimizer.js scripts/lib/index.js scripts/lib/prompt-assemble.js scripts/lib/prompt-selection.js scripts/lib/prompt-normalize.js vscode-extension/src/extension.cjs vscode-extension/src/renderers.cjs
+
+Read [](file://~/Library/Application%20Support/Code/User/workspaceStorage/cdd6ec27b3aa27722fbedbe2c60e5726/GitHub.copilot-chat/chat-session-resources/fbb4ad3e-2119-4d17-b79c-aca93b66627d/call_fRJ0uUUyMfvORKm9yV8m7DUv__vscode-1780573887596/content.txt#1-1), lines 1 to 340
+
+I’ve got a concrete review finding now. I’m pulling exact line references so I can give you the risk and the minimal fix without padding.
+
+Searched for regex `return ''|variants\[key\] \|\| \{\}|resultsById = new Map|sections.push\(buildRow` (`**/scripts/validate-direct-answers.js`), 4 results
+
+Searched for regex `"review-risk"|"setup-guidance"` (`**/measurement/direct-answer-prompt-set.json`), 2 results
+
+Searched for regex `"auth-debug"|"destructive-warning"` (`**/measurement/direct-answer-snapshot.capture.json`), 2 results
+
+Top behavioral risk: the new validator can silently pass incomplete evidence. The prompt set includes `review-risk` and `setup-guidance` in direct-answer-prompt-set.json and direct-answer-prompt-set.json, but the snapshot only contains `auth-debug` and `destructive-warning` in direct-answer-snapshot.capture.json and direct-answer-snapshot.capture.json. Because validate-direct-answers.js returns an empty string for missing output, validate-direct-answers.js defaults missing variants to `{}`, and validate-direct-answers.js still renders a row, the report shows `0` tokens and `review` cells instead of failing. That makes the rollout measurement look healthier than it is.
+
+Smallest fix: make validate-direct-answers.js fail fast on missing data. The minimal patch is to throw when a required variant has neither `output` nor `outputFile`, and to reject any prompt id from the prompt set that is absent from `resultsById` before rendering rows. That turns silent gaps into a hard failure and keeps the report trustworthy.

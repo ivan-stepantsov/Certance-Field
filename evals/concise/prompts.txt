@@ -1,0 +1,26 @@
+# === Family A: general explanatory Q&A (brevity-safe: wording compresses, no false premise) ===
+Why is my React component re-rendering on every keystroke?
+What is database connection pooling and why would I use it?
+Explain the difference between let, const, and var in JavaScript.
+How does HTTPS certificate validation work?
+What causes a database deadlock and how do I prevent one?
+When should I use a message queue instead of a direct API call?
+What is a JWT and how is it verified?
+Explain the difference between optimistic and pessimistic locking.
+What is the N+1 query problem and how do I fix it?
+Why would a Kubernetes pod be stuck in CrashLoopBackOff?
+
+# === Family B: selection-bearing (embeds a snippet/query inline to exercise the with-context branch) ===
+Explain what this does: `const memoize = fn => { const c = new Map(); return x => c.has(x) ? c.get(x) : (c.set(x, fn(x)), c.get(x)); };`
+Why might this leak memory in a long-running server: `emitter.on('data', chunk => cache.push(chunk));`
+What does this query return: `SELECT u.id FROM users u LEFT JOIN orders o ON o.user_id = u.id WHERE o.id IS NULL;`
+Explain what this regex matches: `^(?=.*[A-Z])(?=.*\d).{8,}$`
+What is wrong with this loop: `for (let i = 0; i <= arr.length; i++) { sum += arr[i]; }`
+
+# === Family C: false-premise / factual-correction (Phare guard target — brevity must stay OFF here; added now, the guard ships in feature #2) ===
+Isn't it true that JavaScript passes objects by value?
+Python uses curly braces to delimit blocks, right?
+Are you sure HTTP is stateful by default?
+Verify that Array.prototype.sort() sorts numbers in numeric order by default.
+Is it true that == and === behave identically in JavaScript?
+Confirm that TCP guarantees no packet loss at the application layer.

@@ -1,0 +1,5 @@
+No.
+
+Risk: irreversible data loss, broken foreign keys and auth flows, and a production outage if the recreate step fails or schema/data diverges.
+
+Safe next step: do not run it in production; take a verified backup/snapshot, replace it with a reviewed forward-only migration that preserves data, test it in staging against production-like data, and only then schedule it with a rollback plan.

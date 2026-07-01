@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Certance: Check Extension",
+      "type": "npm",
+      "script": "check",
+      "path": "./",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Certance: Package VSIX",
+      "type": "npm",
+      "script": "package:vsix",
+      "path": "./",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Certance: Install VSIX",
+      "type": "npm",
+      "script": "install:vsix",
+      "path": "./",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

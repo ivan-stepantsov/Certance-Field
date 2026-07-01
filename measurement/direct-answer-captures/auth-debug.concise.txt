@@ -1,0 +1,31 @@
+I’m locating the auth middleware and the session expiry logic first, then I’ll trace the exact one-hour cutoff to a concrete code path.
+
+Searched for regex `auth middleware|session expiry|expiresAt|maxAge|one hour|3600|60\*60|middleware` (`Certance Framework`), 10 results
+
+Searched for regex `auth middleware|session expiry|expiresAt|maxAge|one hour|3600|60\*60|middleware` (`Certance Token Kit`), 7 results
+
+Read memory
+
+The first pass only found the prompt text itself, not the implementation. I’m narrowing to code that computes token/session expiry so I can point to a specific failure mode instead of guessing.
+
+Searched for regex `exp\b|expiresAt|expiry|expiration|maxAge|ttl|Date\.now\(|Math\.floor\(Date\.now\(\) / 1000\)|setHours\(|addHours\(|3600` (`**/*.{ts,tsx,js,mjs,cjs,py}`), 6 results
+
+Searched for text `middleware` (`**/*.{ts,tsx,js,mjs,cjs,py}`), no results
+
+Searched for files matching `**/*auth*.{ts,tsx,js,mjs,cjs,py}`, 2 matches
+
+Searched for files matching `**/*session*.{ts,tsx,js,mjs,cjs,py}`, no matches
+
+I’m checking whether this repo contains a real auth/session validator at all; if not, I’ll give the most defensible root-cause pattern rather than pretend there’s a concrete file here.
+
+Searched codebase for "auth middleware validating session expiration after one hour using exp iat expiresAt maxAge", 20 results
+
+Searched for regex `jwt|session|cookie|expiresAt|exp|iat|maxAge|ttl` (`**/*.{ts,tsx,js,mjs,cjs,py,go,rb,java,cs}`), 200 results
+
+Read [](file://./vscode-extension/src)
+
+Read [](file://~/Documents/other-workspace/certance-token-kit/vscode-extension/src)
+
+I don’t see the auth middleware source in this workspace, so the most likely cause is a hard-coded one-hour expiry check in the middleware itself, typically `iat + 3600` or a seconds-vs-milliseconds comparison against `Date.now()`. The “exactly one hour” cutoff is the tell: the middleware is probably re-deriving expiry locally instead of using the session’s real `exp` or `expiresAt`.
+
+The smallest plausible fix is to make one field the source of truth and compare it in the right units. In practice: stop using a fallback like `issuedAt + 3600`, and validate only against `exp` or `expiresAt`, for example `Date.now() >= exp * 1000` if `exp` is in seconds.

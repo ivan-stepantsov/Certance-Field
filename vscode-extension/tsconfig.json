@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "es2022",
+    "lib": ["es2022"],
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": false
+  },
+  "include": [
+    "src/**/*.cjs"
+  ]
+}

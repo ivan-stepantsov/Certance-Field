@@ -1,0 +1,45 @@
+I’m checking the exact change behind the failed validation and the smallest surface it affects, then I’ll review for the highest behavioral risk and a minimal corrective patch.
+
+Ran terminal command:  pwd && git -C . status --short && git -C . diff --stat && git -C . diff -- scripts/validate-direct-answers.js measurement/direct-answer-snapshot.capture.json measurement/direct-answer-prompt-set.json README.md playbook.md SETUP.md package.json
+
+Read memory
+
+I have the narrowed diff and repo state; next I’m reading just the changed slice tied to the failing validator so the review stays behavioral rather than broad.
+
+Read [](file://~/Library/Application%20Support/Code/User/workspaceStorage/cdd6ec27b3aa27722fbedbe2c60e5726/GitHub.copilot-chat/chat-session-resources/8118f004-a3fb-49ea-a614-c74a5553d744/call_iNNQPQpSYo6ePDYJbHYTe53u__vscode-1780573887562/content.txt#1-1), lines 1 to 260
+
+Read [](file://./scripts/validate-direct-answers.js)
+
+Read [](file://./measurement/direct-answer-snapshot.capture.json)
+
+The validator itself is tiny; the key question now is whether the new data shape or file resolution makes it silently misleading versus just failing loudly. I’m reading the prompt-set and package wiring to pin that down.
+
+Ran terminal command:  node scripts/validate-direct-answers.js --snapshot measurement/direct-answer-snapshot.capture.json
+
+Read [](file://./package.json)
+
+Read [](file://./measurement/direct-answer-prompt-set.json)
+
+The reproduced behavior is the important clue: the validator no longer fails, but it reports brand-new prompt cases as zero-token “review” rows. I’m confirming the exact lines so I can point to the top risk and the smallest corrective change precisely.
+
+Ran terminal command:  nl -ba scripts/validate-direct-answers.js | sed -n '1,220p'
+
+Ran terminal command:  nl -ba measurement/direct-answer-prompt-set.json | sed -n '1,220p'
+
+Ran terminal command:  nl -ba measurement/direct-answer-snapshot.capture.json | sed -n '1,220p'
+
+I have enough to review narrowly now. One last check: whether the surrounding docs treat this command as a gate, because that changes the impact from “confusing report” to “false confidence in measurement.”
+
+Searched for regex `validate-direct-answers|direct-answer-prompt-set|Direct-Answer Validation Report` (`Certance Token Kit`), 10 results
+
+Read [](file://./measurement/direct-answer-validation.md)
+
+The docs do treat this as evidence before rollout, so the impact is stronger: this isn’t just cosmetic reporting, it can certify an incomplete snapshot. I’m pulling the doc line refs, then I’ll give the single top risk and the smallest fix.
+
+Ran terminal command:  nl -ba measurement/direct-answer-validation.md | sed -n '1,180p'
+
+Ran terminal command:  nl -ba measurement/README.md | sed -n '1,120p'
+
+Top behavioral risk: the validator now treats an incomplete snapshot as a valid report instead of a failed check. The prompt set adds direct-answer-prompt-set.json and direct-answer-prompt-set.json, but the captured snapshot still only contains two prompt IDs in direct-answer-snapshot.capture.json. In validate-direct-answers.js, missing prompts fall back to `{}`, and validate-direct-answers.js turns that into empty output, so the report prints `0` tokens and `review` cells rather than failing. That is a behavioral risk because the docs position this command as evidence before treating the direct-default policy as proven in README.md and as comparison against the same fixed prompt set in direct-answer-validation.md.
+
+Smallest fix: fail fast on missing prompt coverage. Before rendering rows, check that every prompt ID in the prompt set exists in the snapshot, and exit non-zero with the missing IDs if not. If you want one tighter step beyond that, also require the three expected variants (`baseline`, `concise`, `directDefault`) for each present prompt. That keeps the report from silently certifying gaps and matches how the workflow is documented.

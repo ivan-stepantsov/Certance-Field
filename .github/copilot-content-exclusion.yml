@@ -1,0 +1,187 @@
+# Certance Token Kit — GitHub Copilot Content Exclusion Reference
+#
+# PURPOSE
+# This file is the canonical, version-controlled source of truth for Copilot
+# content exclusion patterns. It is NOT read automatically by GitHub Copilot.
+# Patterns must be applied through one of the mechanisms below.
+#
+# ENFORCEMENT BOUNDARY (read this):
+# Content exclusion is PLATFORM-ENFORCED for Copilot Chat, completions, and code
+# review — but it does NOT cover VS Code Edit mode, Agent mode, or the Copilot
+# CLI (a documented GitHub limitation). Those surfaces are covered only
+# BEHAVIOURALLY by AGENTS.md (Layer 3). See docs/audit/DATA-FLOW.md for the full
+# enforced-vs-advisory matrix.
+#
+# HOW TO APPLY
+#
+# Option A — GitHub UI (per repository):
+#   Repository > Settings > Copilot > Content exclusion
+#   Paste the patterns from the "repository-level" section below.
+#   Requires: repo admin access, Copilot Business or Enterprise plan.
+#
+# Option B — GitHub UI (organisation-wide):
+#   Organisation > Settings > Copilot > Content exclusion
+#   Paste the patterns from the "organisation-level" section below.
+#   Requires: org owner access, Copilot Business or Enterprise plan.
+#
+# Option C — REST API (enterprise, automatable):
+#   PUT https://api.github.com/enterprises/{enterprise}/copilot/content_exclusion
+#   PUT https://api.github.com/orgs/{org}/copilot/content_exclusion
+#   Required scopes: admin:enterprise or copilot
+#   API reference: https://docs.github.com/en/enterprise-cloud@latest/rest/copilot/copilot-content-exclusion-management
+#   Note: the API accepts JSON (not YAML) and strips all comments on write.
+#
+# WHAT CONTENT EXCLUSION COVERS
+#   ✅ IDE inline completions (VS Code, JetBrains, Visual Studio, Vim/Neovim, Xcode, Eclipse)
+#   ✅ Copilot Chat in IDEs
+#   ✅ Copilot code review
+#   ✅ Copilot on GitHub.com (in preview as of January 2025)
+#   ❌ Copilot CLI
+#   ❌ Agent Mode in IDEs (Edit and Agent modes)
+#   ❌ Copilot Cloud Agents
+#
+# For Agent Mode and Cloud Agents, see AGENTS.md (Layer 3 behavioral controls).
+#
+# PROPAGATION
+#   Changes take up to 30 minutes to take effect in already-loaded IDEs.
+#   Engineers can reload the Copilot extension manually to pick up changes sooner.
+#
+# AUDIT
+#   Change history is visible at:
+#   Organisation > Settings > Copilot > Content exclusion > View history
+#   API: GET /orgs/{org}/copilot/content_exclusion
+#
+# References:
+#   https://docs.github.com/en/copilot/how-tos/configure-content-exclusion/exclude-content-from-copilot
+#   https://docs.github.com/en/copilot/concepts/context/content-exclusion
+#   https://github.blog/changelog/2026-02-26-copilot-content-exclusion-rest-api-in-public-preview/
+
+# ── REPOSITORY-LEVEL FORMAT ───────────────────────────────────────────────────
+# Paste the lines below into: Repository > Settings > Copilot > Content exclusion
+# (one pattern per line, comments are supported in the UI)
+#
+# --- Secrets and environment ---
+# **/.env
+# **/.env.*
+# **/secrets/**
+# **/*.pem
+# **/*.key
+# **/*.p12
+# **/*.pfx
+#
+# --- Dependencies ---
+# **/node_modules/**
+# **/.pnp
+# **/.pnp.js
+#
+# --- Build and compile output ---
+# **/dist/**
+# **/build/**
+# **/out/**
+# **/.next/**
+# **/.nuxt/**
+# **/coverage/**
+# **/*.tsbuildinfo
+#
+# --- Test and runtime artifacts ---
+# **/playwright-report/**
+# **/test-results/**
+# **/allure-results/**
+# **/allure-report/**
+# **/blob-report/**
+# **/screenshots/**
+# **/videos/**
+# **/traces/**
+# **/*.png
+# **/*.webp
+#
+# --- Lock files ---
+# **/package-lock.json
+# **/yarn.lock
+# **/pnpm-lock.yaml
+# **/bun.lockb
+#
+# --- Logs ---
+# **/*.log
+# **/logs/**
+#
+# --- Generated data and fixtures ---
+# **/__snapshots__/**
+# **/*.snap
+# **/test-data/**
+# **/fixtures/data/**
+# **/*.csv
+
+# ── ORGANISATION-LEVEL FORMAT ─────────────────────────────────────────────────
+# Paste the block below into: Organisation > Settings > Copilot > Content exclusion
+# Replace "your-repo" with actual repository names for repo-specific rules.
+# Use "*": to apply patterns across ALL repositories in the organisation.
+
+"*":
+  # Secrets and environment
+  - "**/.env"
+  - "**/.env.*"
+  - "**/secrets/**"
+  - "**/*.pem"
+  - "**/*.key"
+  - "**/*.p12"
+  - "**/*.pfx"
+
+  # Dependencies
+  - "**/node_modules/**"
+  - "**/.pnp"
+  - "**/.pnp.js"
+
+  # Build and compile output
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/out/**"
+  - "**/.next/**"
+  - "**/.nuxt/**"
+  - "**/coverage/**"
+  - "**/*.tsbuildinfo"
+
+  # Test and runtime artifacts
+  - "**/playwright-report/**"
+  - "**/test-results/**"
+  - "**/allure-results/**"
+  - "**/allure-report/**"
+  - "**/blob-report/**"
+  - "**/screenshots/**"
+  - "**/videos/**"
+  - "**/traces/**"
+  - "**/*.png"
+  - "**/*.webp"
+
+  # Lock files
+  - "**/package-lock.json"
+  - "**/yarn.lock"
+  - "**/pnpm-lock.yaml"
+  - "**/bun.lockb"
+
+  # Logs
+  - "**/*.log"
+  - "**/logs/**"
+
+  # Generated data and fixtures
+  - "**/__snapshots__/**"
+  - "**/*.snap"
+  - "**/test-data/**"
+  - "**/fixtures/data/**"
+  - "**/*.csv"
+
+# ── REST API BODY (JSON) ──────────────────────────────────────────────────────
+# The REST API accepts JSON, not YAML. Comments are not preserved by the API.
+# Use this template for automation scripts. All comments will be stripped on PUT.
+#
+# {
+#   "*": [
+#     "**/.env", "**/.env.*", "**/secrets/**", "**/*.pem", "**/*.key",
+#     "**/node_modules/**", "**/dist/**", "**/build/**", "**/out/**",
+#     "**/playwright-report/**", "**/test-results/**", "**/allure-results/**",
+#     "**/allure-report/**", "**/screenshots/**", "**/videos/**", "**/traces/**",
+#     "**/package-lock.json", "**/yarn.lock", "**/pnpm-lock.yaml", "**/bun.lockb",
+#     "**/*.log", "**/logs/**", "**/__snapshots__/**", "**/*.snap",
+#     "**/test-data/**", "**/fixtures/data/**", "**/*.csv"
+#   ]
+# }

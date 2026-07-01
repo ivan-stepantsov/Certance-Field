@@ -1,0 +1,62 @@
+{
+  // ── Copilot completion toggles ─────────────────────────────────────────
+  // Disable completions on file types that produce no useful suggestions.
+  // Keys are VS Code language identifiers (Ctrl+K M shows the current file's ID).
+  // This is the WORKSPACE default — applies to everyone on the team.
+  // Engineers can extend or override this in their own VS Code user settings.
+  // See profiles/vscode-user-settings.jsonc for the personal setup template.
+  "github.copilot.enable": {
+    "*":          true,   // enabled by default for all languages
+    "xml":        false,  // XML — no useful completions
+    "yaml":       false,  // YAML — CI workflows, config; rarely benefits from completions
+    "toml":       false,  // TOML — Cargo.toml, pyproject.toml, config files
+    "properties": false,  // Java/Spring .properties files
+    "dotenv":     false,  // .env files (language ID used by the DotENV extension)
+    "log":        false,  // log files
+    "csv":        false,  // CSV data files
+    "diff":       false,  // diff/patch files
+    "lock":       false   // lock files (forward-looking; current lock files are JSON-typed)
+  },
+
+  // ── File tree visibility ───────────────────────────────────────────────
+  // Hides build artifacts and test output from the VS Code Explorer.
+  // Note: this affects file tree navigation for everyone — it does NOT
+  // directly control Copilot context. Use content exclusion in GitHub
+  // settings for that (see .github/copilot-content-exclusion.yml).
+  "files.exclude": {
+    "**/node_modules":        true,
+    "**/dist":                true,
+    "**/build":               true,
+    "**/out":                 true,
+    "**/playwright-report":   true,
+    "**/test-results":        true,
+    "**/allure-results":      true,
+    "**/allure-report":       true,
+    "**/coverage":            true
+  },
+
+  // ── Workspace search exclusions ────────────────────────────────────────
+  // Keeps Ctrl+Shift+F results free of generated and dependency noise.
+  // Aligned with .github/copilot-content-exclusion.yml patterns.
+  "search.exclude": {
+    "**/node_modules":        true,
+    "**/dist":                true,
+    "**/build":               true,
+    "**/playwright-report":   true,
+    "**/allure-results":      true,
+    "**/allure-report":       true,
+    "**/test-results":        true,
+    "**/coverage":            true,
+    "**/*.snap":              true,
+    "**/*.tsbuildinfo":       true,
+    "**/package-lock.json":   true,
+    "**/yarn.lock":           true,
+    "**/pnpm-lock.yaml":      true,
+    "**/bun.lockb":           true
+  },
+
+  // ── Rename suggestion noise ────────────────────────────────────────────
+  // Prevents Copilot from automatically suggesting symbol renames on every
+  // edit — too noisy during active refactoring.
+  "github.copilot.renameSuggestions.triggerAutomatically": false
+}

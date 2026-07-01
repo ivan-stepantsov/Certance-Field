@@ -1,0 +1,48 @@
+I’m tracing the auth session path from the most local ownership point, then I’ll verify where the one-hour cutoff is computed before proposing the smallest fix.
+
+I’m locating the middleware and the session-expiry calculation. The key check is whether the code is comparing a millisecond timestamp to a one-hour TTL or decoding an hour-based claim incorrectly.
+
+Searched for regex `auth middleware|middleware|session.*expire|expiresAt|maxAge|ttl|exp\b|one hour|3600` (`Certance Framework`), 44 results
+
+Searched for regex `auth middleware|middleware|session.*expire|expiresAt|maxAge|ttl|exp\b|one hour|3600` (`Certance Token Kit`), 9 results
+
+Read memory
+
+The first search only turned up prompt fixtures, not the owning code. I’m narrowing to actual auth/session checks and one-hour constants so I can give a concrete root-cause hypothesis instead of a generic JWT answer.
+
+Searched codebase for "auth middleware session expires after one hour maxAge exp Date.now middleware validate session cookie jwt", no results
+
+Searched for regex `3600|60 \* 60|maxAge\s*[:=]\s*3600|maxAge\s*[:=]\s*60\s*\*\s*60|expiresIn\s*[:=]\s*['\"]?1h|sessionMaxAge|SESSION_TTL|AUTH_TTL|exp\s*[<>=]|Date\.now\(\).*exp|exp.*Date\.now\(` (`Certance Framework` · `**/*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml}`), no results
+
+Searched for regex `3600|60 \* 60|maxAge\s*[:=]\s*3600|maxAge\s*[:=]\s*60\s*\*\s*60|expiresIn\s*[:=]\s*['\"]?1h|sessionMaxAge|SESSION_TTL|AUTH_TTL|exp\s*[<>=]|Date\.now\(\).*exp|exp.*Date\.now\(` (`Certance Token Kit` · `**/*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml}`), no results
+
+There doesn’t seem to be matching application code in the open workspace, which makes this look like a diagnosis question rather than a repo-local bug fix. I’m doing one last targeted search for actual middleware files; if that’s empty, I’ll answer from the failure pattern itself.
+
+Searched for files matching `Certance Framework` · `**/*middleware*.{ts,tsx,js,mjs,cjs}`, no matches
+
+Searched for files matching `Certance Token Kit` · `**/*middleware*.{ts,tsx,js,mjs,cjs}`, no matches
+
+Searched for regex `verifySession|validateSession|requireAuth|getSession|authGuard|sessionGuard|unauthorized|forbidden|jwt.verify|cookie.*maxAge|rolling` (`Certance Framework` · `**/*.{ts,tsx,js,mjs,cjs}`), no results
+
+Searched for regex `verifySession|validateSession|requireAuth|getSession|authGuard|sessionGuard|unauthorized|forbidden|jwt.verify|cookie.*maxAge|rolling` (`Certance Token Kit` · `**/*.{ts,tsx,js,mjs,cjs}`), no results
+
+The likely root cause is a hard-coded one-hour TTL in the middleware, not a genuinely expired session. The “exactly one hour” pattern is the tell: something is probably doing a local check like “issued at + 3600” or using a cookie/session `maxAge` of one hour, while the real session remains valid because the identity provider or backend has a longer or rolling lifetime.
+
+The smallest plausible fix is to stop deriving expiry from a fixed one-hour constant and use the session’s authoritative expiry instead. In practice that usually means:
+
+```ts
+const expiresAtMs = session.exp * 1000; // JWT exp is seconds
+if (Date.now() >= expiresAtMs) {
+  return unauthorized();
+}
+```
+
+not:
+
+```ts
+const expiresAtMs = session.iat * 1000 + 60 * 60 * 1000;
+```
+
+If this is a server-side session rather than a JWT, the equivalent fix is to align the middleware’s `maxAge`/expiry check with the session store’s actual expiry, or enable rolling renewal if that’s the intended behavior.
+
+I couldn’t find the owning auth middleware in the current workspace, so this is diagnosis from the failure pattern rather than a file-specific patch. If you point me to the middleware file, I can make the exact minimal edit.

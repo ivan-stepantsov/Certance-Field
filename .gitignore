@@ -1,0 +1,11 @@
+node_modules/
+*.log
+test-fixtures/
+.DS_Store
+
+# Internal research runs live in the private archive, never the product repo
+research/
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

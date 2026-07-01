@@ -1,0 +1,46 @@
+{
+  "name": "ce-token-kit-core",
+  "version": "0.2.27",
+  "description": "Certance Token Kit - cut GitHub Copilot token costs locally, with secret protection and audit evidence. No cloud, no external calls.",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./scripts/lib/index.js",
+    "./engine": "./scripts/lib/engine.js",
+    "./prompt": "./scripts/lib/prompt-optimizer.js"
+  },
+  "bin": {
+    "ce-compress": "./scripts/compress.js",
+    "ce-optimize-prompt": "./scripts/optimize-prompt.js"
+  },
+  "scripts": {
+    "compress": "node scripts/compress.js",
+    "optimize:prompt": "node scripts/optimize-prompt.js",
+    "compress:output": "node scripts/compress.js --mode output",
+    "compress:json": "node scripts/compress.js --mode json",
+    "compress:code": "node scripts/compress.js --mode code",
+    "compress:instructions": "node scripts/compress.js --mode instructions",
+    "compress:outline": "node scripts/compress.js --mode outline",
+    "compress:diff": "node scripts/compress.js --mode diff",
+    "evals:concise": "node evals/concise/measure.mjs",
+    "evals:tokenizer": "node evals/tokenizer/calibrate.mjs",
+    "validate:direct-answers": "node scripts/validate-direct-answers.js",
+    "validate:doc-links": "node scripts/validate-doc-links.js",
+    "check": "tsc -p tsconfig.json",
+    "lint": "eslint scripts/",
+    "test": "node --test scripts/lib/*.test.js scripts/compressors/*.test.js scripts/*.test.js",
+    "validate": "node scripts/compress.js profiles/core.manifest.json --mode json >/dev/null && node scripts/validate-doc-links.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "gpt-tokenizer": "^3.4.0",
+    "typescript": "^5.8.0"
+  }
+}

@@ -1,0 +1,3 @@
+No. The risk is immediate, irreversible data loss in production, plus follow-on failures in auth, foreign keys, audit history, and any service that depends on user records.
+
+The safe next step is to stop and treat this as a controlled migration task instead: confirm why the table needs to change, take a verified backup, rehearse the exact script against a recent production clone, replace destructive drop/recreate logic with a non-destructive migration if possible, and only proceed through the normal approval and maintenance-window process. If you want, paste the script and I’ll assess whether it can be rewritten safely.

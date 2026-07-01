@@ -1,0 +1,33 @@
+{
+  // Certance Token Kit — Minimal MCP Toolset Template
+  // Copy to .vscode/mcp.json (or merge with your existing MCP config).
+  // Goal: keep enabled tools minimal by default to reduce context overhead.
+
+  "$schema": "https://example.invalid/mcp.schema.json",
+
+  // Replace placeholder servers and tools with your real MCP servers.
+  "servers": {
+    "github": {
+      "enabled": true,
+      // Keep this list short and repo-specific.
+      "allowed_tools": [
+        "list_pull_requests",
+        "get_pull_request",
+        "list_issues"
+      ],
+      // Enable where supported by your MCP runtime.
+      "defer_loading": true
+    },
+    "playwright": {
+      "enabled": true,
+      // Example: keep only high-frequency tools for the target workflow.
+      "allowed_tools": [
+        "navigate",
+        "click",
+        "type",
+        "snapshot"
+      ],
+      "defer_loading": true
+    }
+  }
+}

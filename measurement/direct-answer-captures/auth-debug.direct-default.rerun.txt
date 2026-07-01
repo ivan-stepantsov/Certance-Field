@@ -1,0 +1,27 @@
+I’m tracing the auth middleware and the session lifetime boundary first so I can pin this to the code path that decides expiry before proposing a minimal fix.
+
+I’m narrowing to the code that computes session expiry and looking for any one-hour constant or unit mismatch around token timestamps.
+
+Searched for regex `auth middleware|session.*(expire|expiry|expires)|maxAge|expiresAt|exp\b|one hour|3600` (`Certance Token Kit`), 125 results
+
+Searched for regex `auth middleware|session.*(expire|expiry|expires)|maxAge|expiresAt|exp\b|one hour|3600` (`Certance Framework`), 18 results
+
+I found a stronger discriminator: the stored ClickUp auth state carries a JWT whose `exp` is about 48 hours after `iat`, so a one-hour cutoff is almost certainly local middleware logic rather than the upstream session actually expiring.
+
+Read [](file://~/Documents/other-workspace/skills/core/auth.md#130-130), lines 130 to 162
+
+Read [](file://~/Documents/other-workspace/skills/playwright-cli/sessions.md#50-50), lines 50 to 64
+
+I’m doing one last local check for an actual middleware implementation in the workspace; if it isn’t here, I’ll keep the diagnosis precise and call out that it’s pattern-based rather than file-specific.
+
+Searched for files matching `Certance Framework` · `**/*middleware*.{ts,js,mjs,cjs}`, no matches
+
+Searched for files matching `Certance Token Kit` · `**/*middleware*.{ts,js,mjs,cjs}`, no matches
+
+Searched for regex `issuedAt|dateIssued|iat|maxAge|expiresIn|exp\b|session.*token|cookie.*expires` (`**/*.{ts,tsx,js,mjs,cjs}`), 5 results
+
+The likely root cause is a local one-hour TTL check in the middleware, not the session actually expiring. The “fails after exactly one hour” pattern usually means one of three things: the code is deriving expiry from `iat` or `issuedAt` plus `3600`, enforcing a cookie/session `maxAge` of one hour, or comparing a JWT `exp` value in seconds against `Date.now()` in milliseconds. In the current workspace I could not find the owning middleware source; the closest auth guidance in auth.md describes expiry as cookie-driven, not a repo-local fixed hour.
+
+The smallest plausible fix is to stop re-deriving expiry and use the authoritative expiry field in the correct units. In practice that usually means replacing logic like `issuedAt + 3600 < now` with `Date.now() >= exp * 1000` for JWTs, or removing the extra one-hour guard if upstream session verification already handles expiry. If this is a server-side session rather than a JWT, the equivalent fix is to align the middleware’s `maxAge` with the session store’s real expiry instead of hard-coding `3600`.
+
+If you want, point me to the middleware file and I’ll turn that into the exact minimal patch.

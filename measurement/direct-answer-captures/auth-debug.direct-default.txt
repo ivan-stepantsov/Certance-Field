@@ -1,0 +1,41 @@
+I’m locating the auth middleware and the session expiry path first so I can tie the one-hour cutoff to the exact check that rejects the session.
+
+Read memory
+
+I’m doing a narrow search around auth/session expiry handling rather than mapping the whole repo; the goal is one concrete hypothesis and a quick code check to confirm it.
+
+Searched for regex `auth middleware|session|expiresAt|expiry|expiration|maxAge|one hour|3600|60\s*\*\s*60|Date.now\(|exp\b` (`**/*.{ts,tsx,js,jsx,mjs,cjs}`), 6 results
+
+Searched for files matching `**/*auth*.*`, 5 matches
+
+Searched for files matching `**/*middleware*.*`, no matches
+
+The first pass didn’t surface a literal middleware file, so I’m switching to semantic search around session validation and `exp` handling to find the actual decision point.
+
+Searched codebase for "auth middleware validates session expiration rejects after one hour exp expiresAt jwt cookie session middleware", 20 results
+
+Searched for regex `middleware|session|token|jwt|expires|expiration|exp\s*[:)]|maxAge|cookie` (`Certance Token Kit`), 200 results
+
+Searched for regex `middleware|session|token|jwt|expires|expiration|exp\s*[:)]|maxAge|cookie` (`Certance Framework`), 200 results
+
+I have one concrete hypothesis now: the rejection path is probably deriving expiry from issue time plus a hardcoded hour instead of using the token’s real `exp` or cookie expiry. I’m checking for that specific pattern before I conclude.
+
+Searched for regex `iat|maxAge|3600|60 \* 60|expiresIn|Date\.now\(\).*3600|issuedAt|dateIssued|exp` (`**/*.{ts,tsx,js,jsx,mjs,cjs,json}`), 200 results
+
+Searched for regex `<\s*Date\.now\(|<=\s*Date\.now\(|Date\.now\(\)\s*[<>]=?\s*.*exp|exp\s*\*\s*1000|new Date\(.*exp` (`**/*.{ts,tsx,js,jsx,mjs,cjs}`), no results
+
+I don’t see an actual auth middleware implementation in this workspace. The auth material here is test-side and documents that session validity is driven by stored cookies and token expiry, not a repo-local middleware layer: auth.md and auth.spec.ts.
+
+Given the symptom, the most likely root cause is a hardcoded one-hour freshness check in the middleware, usually one of these forms:
+- deriving expiry from issued-at plus 3600 seconds instead of using the token’s real exp claim
+- enforcing a fixed maxAge of one hour even when the session cookie or refreshable token is still valid
+- comparing mixed units, where exp is in seconds and now is in milliseconds, then “fixing” it with a one-hour fallback
+
+The smallest plausible fix is to make the middleware trust the actual expiry source instead of a derived one-hour window:
+- if it validates a JWT, check exp against Date.now() / 1000
+- if it validates a signed session cookie, verify the cookie and stop rejecting based on issuedAt plus one hour
+- if there is a configured TTL, align it with the real session lifetime rather than 3600
+
+In practice, the minimal code change is usually replacing logic like issuedAt + 3600 < now with exp <= nowSeconds, or removing the extra one-hour guard entirely if upstream session verification already covers expiry.
+
+The fastest confirmation is to search that middleware for 3600, 60 * 60, maxAge, expiresIn, issuedAt, or iat. If you want, I can locate that code once you point me to the app folder or paste the middleware file.

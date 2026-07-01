@@ -1,0 +1,28 @@
+{
+  // MCP servers available to GitHub Copilot agents in this workspace.
+  // Docs: https://code.visualstudio.com/docs/copilot/chat/mcp-servers
+
+  "servers": {
+
+    // ── Codacy REST API ────────────────────────────────────────────────────
+    // Gives Copilot agents read access to Codacy issues, quality gates,
+    // and analysis results without requiring the local CLI or Docker.
+    //
+    // Setup:
+    //   1. Go to app.codacy.com → your repo → Settings → Integrations → API tokens
+    //   2. Generate a Repository API token (read scope is sufficient)
+    //   3. Add to your shell profile (NOT committed to the repo):
+    //        export CODACY_API_TOKEN="your-token-here"
+    //   4. Reload VS Code window
+    //
+    // The token is read from the environment — never hard-code it here.
+    "codacy": {
+      "type": "http",
+      "url": "https://app.codacy.com/api/v3",
+      "headers": {
+        "api-token": "${env:CODACY_API_TOKEN}"
+      }
+    }
+
+  }
+}

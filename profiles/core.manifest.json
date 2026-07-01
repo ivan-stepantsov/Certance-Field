@@ -1,0 +1,19 @@
+{
+  "name": "core",
+  "description": "Generic GitHub Copilot token-efficiency starter for a single repository.",
+  "files": [
+    ".copilotignore",
+    "AGENTS.md",
+    ".github/copilot-instructions.md",
+    ".github/instructions/lean-output.instructions.md",
+    ".github/copilot-content-exclusion.yml",
+    ".vscode/settings.json",
+    "profiles/vscode-user-settings.jsonc",
+    "profiles/mcp-minimal-tools.jsonc",
+    "docs/playbook.md",
+    "measurement/README.md",
+    "measurement/evidence-matrix.md",
+    "measurement/before-after-examples.md",
+    "measurement/savings-worksheet.md"
+  ]
+}

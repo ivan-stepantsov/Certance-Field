@@ -1,0 +1,7 @@
+# Eval snapshots hold raw model output, which can contain credential-shaped
+# example strings (e.g. JWTs from a "what is a JWT" answer). Keep them tracked in
+# the dev repo so CI's measure.mjs has a baseline, but never ship them to the
+# public mirror — publish-sync builds that tree via `git archive`, which honors
+# export-ignore. This closes the whole "model output trips push protection" risk
+# class, not just one token shape.
+evals/concise/snapshots/** export-ignore

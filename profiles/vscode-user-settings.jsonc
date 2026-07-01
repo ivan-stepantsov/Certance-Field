@@ -1,0 +1,119 @@
+{
+  // Certance Token Kit — VS Code User Settings Template
+  // =====================================================
+  // These settings go in your PERSONAL VS Code user settings,
+  // not in the workspace .vscode/settings.json.
+  //
+  // WHY USER SETTINGS:
+  //   Workspace settings are shared with the team via version control.
+  //   Your personal Copilot preferences belong in user settings so they
+  //   apply to every project you open — including repos that don't have
+  //   a .vscode/settings.json — without affecting your teammates.
+  //
+  // HOW TO APPLY:
+  //   1. In VS Code: Cmd+Shift+P (Mac) or Ctrl+Shift+P (Windows/Linux)
+  //   2. Type "Open User Settings (JSON)" and press Enter
+  //   3. Merge the sections below into your existing settings.json
+  //      If "github.copilot.enable" already exists, merge the inner
+  //      key-value pairs — do NOT replace the whole block.
+  //
+  // HOW TO CHECK A FILE'S LANGUAGE ID:
+  //   Open the file in VS Code → Ctrl+K M (or click the language name
+  //   in the status bar at the bottom right). Use that exact string here.
+  //
+  // CONTENT EXCLUSION (Chat + completions at platform level):
+  //   These settings only control IDE completions, not Copilot Chat context.
+  //   For Chat exclusion, ask your repo admin to configure:
+  //   Repository → Settings → Copilot → Content exclusion
+  //   See .github/copilot-content-exclusion.yml for the pattern list.
+
+  // ── Copilot completion toggles ──────────────────────────────────────────
+  // Disable completions on file types that produce no useful suggestions.
+  // This extends the team workspace settings with additional personal coverage.
+  "github.copilot.enable": {
+
+    // ── Keep ON (do not add these to disable list) ───────────────────────
+    // javascript, typescript, typescriptreact, javascriptreact,
+    // python, go, java, rust, csharp, cpp, c, swift, kotlin, ruby,
+    // json, jsonc, html, css, scss, sass, markdown, shellscript
+
+    "*":          true,   // enabled for all languages unless overridden below
+
+    // ── Config and data formats ──────────────────────────────────────────
+    "xml":        false,  // XML — no useful completions
+    "yaml":       false,  // YAML — CI config, rarely benefits from completions
+    "toml":       false,  // TOML — Cargo.toml, pyproject.toml, config files
+    "properties": false,  // Java/Spring .properties files
+    "ini":        false,  // INI config files (.ini, .cfg)
+
+    // ── Secrets and environment ──────────────────────────────────────────
+    // Language IDs for .env files depend on which extension is installed:
+    //   "dotenv"    → DotENV extension by mikestead (most common)
+    //   "env"       → some other extensions use this ID
+    //   "plaintext" → fallback if no extension is installed
+    // Add the one that matches what you see in your status bar.
+    "dotenv":     false,  // .env files (DotENV extension language ID)
+    "env":        false,  // .env files (alternative language ID)
+
+    // ── Logs and output ──────────────────────────────────────────────────
+    "log":        false,  // log files
+
+    // ── Data files ───────────────────────────────────────────────────────
+    "csv":        false,  // CSV data files
+
+    // ── VCS and diffs ─────────────────────────────────────────────────────
+    "diff":       false,  // diff/patch files
+    "ignore":     false,  // .gitignore, .npmignore (gitignore extension language ID)
+
+    // ── Lock files ────────────────────────────────────────────────────────
+    // package-lock.json and yarn.lock are typed as JSON in VS Code by default.
+    // Disabling "json" would be too aggressive. The "lock" key is forward-
+    // looking for extensions that assign that language ID.
+    "lock":       false,
+
+    // ── Plain text (optional) ─────────────────────────────────────────────
+    // Remove the line below if you write code notes, drafts, or
+    // documentation in .txt files and want completions there.
+    "plaintext":  false
+  },
+
+  // ── Rename suggestion noise ────────────────────────────────────────────
+  // Prevents Copilot from automatically suggesting symbol renames on every
+  // edit during active refactoring.
+  "github.copilot.renameSuggestions.triggerAutomatically": false
+
+  // ── OPTIONAL / EXPERIMENTAL — Local Model Lane (Ollama) ─────────────────
+  // Not part of the default kit. Adds a dependency: a local model runtime.
+  // Uncomment only if all of the following are true:
+  //   1. Ollama is installed and running (https://ollama.com)
+  //   2. You've pulled a small tool-calling model:
+  //        ollama pull qwen3:8b
+  //   3. Your org has approved running local model runtimes on this device
+  //
+  // REQUIRED BEFORE UNCOMMENTING THESE SETTINGS:
+  //   Register Ollama as a provider first via the VS Code UI:
+  //   Cmd+Shift+P → "Chat: Manage Language Models" → Add Models → Custom Endpoint
+  //     Group name : Ollama
+  //     API key    : ollama
+  //     API type   : Chat Completions
+  //     URL        : http://localhost:11434/v1/chat/completions
+  //     Model ID   : qwen3:8b
+  //   After saving, check the model picker to see the exact name VS Code
+  //   assigned — use that string below, not a hardcoded guess.
+  //
+  // What it does: routes lightweight utility flows (commit messages, title
+  // generation, rename suggestions, prompt categorization) to the local
+  // model instead of a premium cloud model. Does not affect inline
+  // completions or your main chat model.
+  //
+  // See docs/playbook.md → "Local Model Lane" for scope, and when to skip this.
+  //
+  // "chat.utilityModel": "qwen3:8b",      // replace with exact picker name
+  // "chat.utilitySmallModel": "qwen3:8b", // replace with exact picker name
+  //
+  // Optional — create a context-limited variant to avoid memory-driven retries:
+  //   ollama show qwen3:8b --modelfile > Modelfile
+  //   echo 'PARAMETER num_ctx 2048' >> Modelfile
+  //   ollama create qwen3:8b-2k -f Modelfile
+  // then register qwen3:8b-2k as the model ID in the UI step above.
+}

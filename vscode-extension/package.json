@@ -1,0 +1,259 @@
+{
+  "name": "ce-token-kit",
+  "displayName": "Certance Token Kit",
+  "description": "Cut your GitHub Copilot token bill, locally: compress context, redact and scan for secrets, and export audit evidence. No cloud, no external calls.",
+  "version": "0.2.73",
+  "publisher": "ivan-stepantsov",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ivan-stepantsov/Certance-Field.git"
+  },
+  "keywords": [
+    "copilot",
+    "tokens",
+    "prompt-optimization",
+    "ce",
+    "certance"
+  ],
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "type": "module",
+  "main": "./src/extension.cjs",
+  "files": [
+    "src/**",
+    "README.md",
+    "LICENSE.txt",
+    "package.json"
+  ],
+  "contributes": {
+    "chatParticipants": [
+      {
+        "id": "ivan-stepantsov.cetoken",
+        "name": "cetoken",
+        "fullName": "Certance Token Kit",
+        "description": "Compress oversized context and tighten prompts before they cost tokens",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "compress",
+            "description": "Compress the active selection (code, JSON, test output, or diff)"
+          },
+          {
+            "name": "focus",
+            "description": "Build a focused context pack — extract the decisive lines from a failure, diff, or trace"
+          },
+          {
+            "name": "outline",
+            "description": "Outline a large file — keep signatures and types, drop bodies"
+          },
+          {
+            "name": "review",
+            "description": "Review the selected diff — highest-risk findings first"
+          },
+          {
+            "name": "debug",
+            "description": "Debug the selected stack trace — root cause, then smallest fix"
+          },
+          {
+            "name": "explain",
+            "description": "Explain code — outlines big files, compresses small selections"
+          }
+        ]
+      },
+      {
+        "id": "ivan-stepantsov.cetoken-concise",
+        "name": "cetoken-concise",
+        "fullName": "Certance Token Kit — Concise",
+        "description": "Answer my question concisely to save output tokens (always answers; calls the model)",
+        "isSticky": true,
+        "when": "config.ceTokenKit.concise.enabled"
+      }
+    ],
+    "languageModelTools": [
+      {
+        "name": "ce_compress",
+        "tags": [
+          "ce-token-kit"
+        ],
+        "toolReferenceName": "ceCompress",
+        "displayName": "CE: Compress context",
+        "modelDescription": "Compress large code, diffs, JSON, or test output before it enters the model context. Preserves structure and signal while stripping comments, blank-line runs, passing tests, and stack-frame noise. Use when a payload is large and only its structure or the failing part matters.",
+        "userDescription": "Let Copilot's agent auto-compress large context (code, diffs, JSON, test output) to save tokens.",
+        "canBeReferencedInPrompt": true,
+        "icon": "$(graph)",
+        "when": "config.ceTokenKit.agentTool.enabled",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "content": {
+              "type": "string",
+              "description": "The code, diff, JSON, or test output to compress."
+            },
+            "filename": {
+              "type": "string",
+              "description": "Optional file name (e.g. LoginPage.ts) to help detect the language."
+            }
+          },
+          "required": [
+            "content"
+          ]
+        }
+      }
+    ],
+    "configuration": {
+      "title": "Certance Token Kit",
+      "properties": {
+        "ceTokenKit.chat.answerMode": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "When on, `@cetoken` sends the optimized prompt to your selected Copilot model and streams the answer in the chat pane (this consumes a Copilot request). When off, `@cetoken` returns the optimized prompt for you to send yourself — no request is spent."
+        },
+        "ceTokenKit.agentTool.enabled": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Register the `#ceCompress` Language Model tool so Copilot **agent mode** can auto-compress large context (code, diffs, JSON, test output) to save tokens. Off by default — when off, the tool is not offered to the agent. You can also untick it anytime in the agent **Configure Tools** picker, or invoke it explicitly with `#ceCompress`."
+        },
+        "ceTokenKit.concise.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Register the `@cetoken-concise` chat participant, which answers your question tersely to save output tokens. It only acts when you `@`-mention it (and, like Answer mode, it calls your Copilot model). **On by default.** Set to `false` by policy to remove this model-calling surface entirely — needed for a Transform-only regulated lockdown. Changing this takes effect after a window reload."
+        },
+        "ceTokenKit.concise.level": {
+          "type": "string",
+          "enum": [
+            "lite",
+            "full",
+            "ultra"
+          ],
+          "default": "full",
+          "markdownEnumDescriptions": [
+            "**lite** — cut filler, hedging, and pleasantries, but keep full sentences and articles. Professional but tight; lowest risk of ambiguity.",
+            "**full** (default) — drop articles and filler, fragments allowed, short words. Classic terse answer.",
+            "**ultra** — *retired.* Measured to produce **longer** output than **full** (compressing the wording harder backfired), so it now runs exactly as **full**. Kept as a valid value so existing settings don't error; a redesigned aggressive level may return later."
+          ],
+          "markdownDescription": "How terse `@cetoken-concise` answers are. Every level compresses the *wording* only — never the reasoning or steps needed for correctness (forcing brevity on the reasoning degrades accuracy). All levels keep code, identifiers, and error strings verbatim and switch back to full prose for security warnings, irreversible actions, and order-sensitive steps."
+        },
+        "ceTokenKit.concise.debugReferences": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Diagnostic only. When on, `@cetoken-concise` prints the raw `#`-reference list VS Code passes it (each reference's id, whether you typed it, its value type, and what the current filter does) so context-attachment behaviour can be debugged. Off by default."
+        },
+        "ceTokenKit.costPerMillionTokensUSD": {
+          "type": "number",
+          "default": 0,
+          "markdownDescription": "Your plan's blended **$ per 1,000,000 tokens**, used by **CE: Export Audit Evidence** to convert estimated tokens saved into an estimated **cost saved**. Default `0` shows tokens only. Set it to your Copilot AI-credit / token rate to see a dollar figure (clearly labelled as an estimate)."
+        },
+        "ceTokenKit.secretPatterns": {
+          "type": "array",
+          "default": [],
+          "markdownDescription": "Org-specific secret patterns to redact **in addition to** the built-ins. Each entry is `{ \"name\": \"…\", \"regex\": \"…\" }`: the `regex` (a JavaScript pattern string) is matched globally and every match is replaced with `[REDACTED_<NAME>]`. Lets a regulated team catch its own token formats without changing the extension. Invalid regexes are skipped. Applies to every redaction surface and takes effect on change.",
+          "items": {
+            "type": "object",
+            "required": [
+              "regex"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Label for the placeholder, e.g. \"CORP_TOKEN\" produces [REDACTED_CORP_TOKEN]."
+              },
+              "regex": {
+                "type": "string",
+                "description": "JavaScript regular-expression source, e.g. \"corp-[A-Za-z0-9]{32}\"."
+              }
+            }
+          }
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "ceTokenKit.optimizePrompt",
+        "title": "CE: Optimize Prompt"
+      },
+      {
+        "command": "ceTokenKit.reviewDiff",
+        "title": "CE: Review Diff"
+      },
+      {
+        "command": "ceTokenKit.debugStackTrace",
+        "title": "CE: Debug Stack Trace"
+      },
+      {
+        "command": "ceTokenKit.explainSelection",
+        "title": "CE: Explain Selection"
+      },
+      {
+        "command": "ceTokenKit.checkContextReadiness",
+        "title": "CE: Check Context Readiness"
+      },
+      {
+        "command": "ceTokenKit.redactClipboard",
+        "title": "CE: Redact Clipboard"
+      },
+      {
+        "command": "ceTokenKit.applyGuardrailProfile",
+        "title": "CE: Apply Guardrail Profile"
+      },
+      {
+        "command": "ceTokenKit.exportAuditEvidence",
+        "title": "CE: Export Audit Evidence"
+      },
+      {
+        "command": "ceTokenKit.scanWorkspaceSecrets",
+        "title": "CE: Scan Workspace for Secrets"
+      },
+      {
+        "command": "ceTokenKit.installPrecommitHook",
+        "title": "CE: Install Pre-commit Secret Scan"
+      },
+      {
+        "command": "ceTokenKit.recommendModel",
+        "title": "CE: Recommend a Model for This Task"
+      },
+      {
+        "command": "ceTokenKit.showStats",
+        "title": "CE: Show Local Stats"
+      },
+      {
+        "command": "ceTokenKit.resetStats",
+        "title": "CE: Reset Local Stats"
+      }
+    ]
+  },
+  "scripts": {
+    "check": "tsc -p tsconfig.json",
+    "lint": "eslint src/ test/",
+    "sync": "node scripts/sync-shared.cjs",
+    "sync:check": "node scripts/sync-shared.cjs --check",
+    "pretest": "node scripts/sync-shared.cjs --check",
+    "test": "node --test test/*.test.cjs",
+    "test:integration": "vscode-test",
+    "brand:personal": "node scripts/apply-branding.cjs personal",
+    "brand:certance": "node scripts/apply-branding.cjs certance",
+    "brand:check": "node scripts/apply-branding.cjs personal --check",
+    "package:vsix": "node scripts/sync-shared.cjs && vsce package",
+    "package:personal": "npm run brand:personal && npm run package:vsix",
+    "package:certance": "npm run brand:certance && npm run package:vsix",
+    "install:vsix": "node scripts/install-vsix.cjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^24.13.2",
+    "@types/vscode": "1.100",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0",
+    "@vscode/vsce": "^3.6.2",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "typescript": "^5.9.3"
+  }
+}

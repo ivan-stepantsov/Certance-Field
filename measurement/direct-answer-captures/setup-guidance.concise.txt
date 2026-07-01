@@ -1,0 +1,29 @@
+I’m checking the extension’s local scripts and README so I can give you the exact install and verification steps for this repo.
+
+Read [](file://./vscode-extension/package.json)
+
+Read [](file://./vscode-extension/README.md)
+
+I have the install path. I’m checking one small implementation detail so the verification step matches how this extension actually activates.
+
+Read [](file://./vscode-extension/src/extension.cjs#1-1), lines 1 to 220
+
+Searched for files matching `Certance Token Kit` · `vscode-extension/.vscode/*`, 2 matches
+
+I’ve confirmed it activates on VS Code startup and exposes commands immediately after load. I’m pulling the task names so the instructions match the repo exactly.
+
+Read [](file://./vscode-extension/.vscode/tasks.json)
+
+Read [](file://./vscode-extension/.vscode/launch.json)
+
+From `certance-token-kit/vscode-extension`, install it locally with:
+
+```bash
+npm install
+npm run package:vsix
+npm run install:vsix
+```
+
+You can do the same from VS Code via the tasks `Certance: Package VSIX` and `Certance: Install VSIX`.
+
+Verify it loaded by reloading VS Code, then checking the Command Palette for any of these commands: `CE: Optimize Prompt`, `CE: Review Diff`, `CE: Debug Stack Trace`, `CE: Explain Selection`, `CE: Show Local Stats`. If those commands appear, the extension is installed and activated correctly. For development-only verification, open the extension folder and press `F5`; the Extension Development Host should launch with the same commands available.

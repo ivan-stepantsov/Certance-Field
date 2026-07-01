@@ -1,0 +1,61 @@
+I’m checking the extension package and repo docs so I can give you the exact local install and verification steps for this workspace.
+
+Read [](file://./vscode-extension/package.json)
+
+Read [](file://./vscode-extension/README.md)
+
+Read [](file://./vscode-extension)
+
+Read memory
+
+I found both a packaged .vsix and the extension’s install script. I’m checking the exact install path and the cleanest verification signal so the steps match what’s already in the repo.
+
+Read [](file://./vscode-extension/scripts/install-vsix.cjs)
+
+Read [](file://./vscode-extension/.vscode/launch.json)
+
+Read [](file://./vscode-extension/.vscode/tasks.json)
+
+Read [](file://./vscode-extension/src/extension.cjs#1-1), lines 1 to 260
+
+The extension activates on startup and registers six commands, so verification can be more exact than “it installed.” I’m pulling the activation path and command IDs, then I’ll give you the shortest reliable checks.
+
+Read [](file://./vscode-extension/src/extension.cjs#261-261), lines 261 to 305
+
+Use the packaged VSIX if you want the quickest local install. Run these from the extension folder at Certance Token Kit/vscode-extension/package.json, which already defines the install and packaging scripts, and there is already a built VSIX in that folder.
+
+1. In a terminal:
+   cd "./vscode-extension"
+2. If you want to rebuild first:
+   npm install
+   npm run check
+   npm run package:vsix
+3. Install the extension into your local VS Code:
+   npm run install:vsix
+
+If that install step fails with a message about the `code` CLI not being found, use VS Code’s Command Palette and run Shell Command: Install 'code' command in PATH, then rerun the install. The install script in Certance Token Kit/vscode-extension/scripts/install-vsix.cjs just calls `code --install-extension <vsix> --force`.
+
+If you want to verify it loaded correctly, use the fastest checks tied to how the extension is defined in Certance Token Kit/vscode-extension/package.json and activated in Certance Token Kit/vscode-extension/src/extension.cjs:
+
+1. Reload VS Code once after install.
+2. Open the Command Palette and search for these commands:
+   CE: Optimize Prompt
+   CE: Review Diff
+   CE: Debug Stack Trace
+   CE: Explain Selection
+   CE: Show Local Stats
+   CE: Reset Local Stats
+3. Look for the status bar item on startup:
+   CE: 0t saved
+   or another token count if stats already exist
+4. Run CE: Show Local Stats. A markdown results document opening successfully is a clean smoke test.
+5. Optional CLI check:
+   code --list-extensions | grep certance
+   You should see `certance.certance-token-kit`.
+
+For development-only testing, you can also open Certance Token Kit/vscode-extension/.vscode/launch.json and press F5 to launch an Extension Development Host instead of installing the VSIX. That is the better path if you are actively changing the extension.
+
+If you want, I can give you the exact shortest path for either:
+1. install the existing VSIX now
+2. rebuild and reinstall from source
+3. run it in an Extension Development Host only

@@ -1,0 +1,66 @@
+I’m checking the extension package and repo scripts first so I can give you the exact local install and verification path for this workspace.
+
+Read memory
+
+Read [](file://./vscode-extension/README.md)
+
+Read [](file://./vscode-extension/package.json)
+
+I’ve got the extension’s package metadata; now I’m checking the local packaging/install helpers so the steps match what actually exists in the repo.
+
+Searched for files matching `Certance Token Kit` · `vscode-extension/.vscode/*`, 2 matches
+
+Read [](file://./vscode-extension)
+
+Read [](file://./vscode-extension/scripts/install-vsix.cjs)
+
+Read [](file://./vscode-extension/.vscode/tasks.json)
+
+Read [](file://./vscode-extension/.vscode/launch.json)
+
+Read [](file://./vscode-extension/src/extension.cjs#1-1), lines 1 to 240
+
+I’m checking whether the VS Code CLI is available and whether this extension is already installed, so I can include the exact verification command and expected result.
+
+Ran terminal command:  cd "./vscode-extension" && command -v code && code --list-extensions --show-versions | rg "certance-token-kit|certance\.certance-token-kit"
+
+Read [](file://./vscode-extension/package.json)
+
+The `code` CLI is available. `rg` is not on PATH in that terminal, so I’m rerunning the extension check with plain shell tools.
+
+Ran terminal command:  code --list-extensions --show-versions | grep -i "certance-token-kit\|certance\.certance-token-kit" || true
+
+Use the extension workspace directly:
+
+```bash
+cd "./vscode-extension"
+npm install
+npm run check
+npm test
+npm run package:vsix
+npm run install:vsix
+```
+
+That is the intended flow from the repo. The `code` CLI is on your PATH, so local install via `npm run install:vsix` should work once the VSIX filename matches the current package metadata.
+
+Two important details:
+
+1. The extension ID is `certance.certance-token-kit` because `publisher=certance` and `name=certance-token-kit`.
+2. There is already a VSIX in the folder named `certance-token-optimizer-0.1.0.vsix`, but the current install script expects `certance-token-kit-0.1.0.vsix`. Running `npm run package:vsix` first should generate the correctly named fresh package and avoid that mismatch.
+
+To verify it loaded correctly, use both a CLI check and a UI check:
+
+```bash
+code --list-extensions --show-versions | grep "certance.certance-token-kit"
+```
+
+You should see one line with the extension and version `0.1.0`.
+
+Inside VS Code, verify these:
+
+1. Open Command Palette and search for `CE: Optimize Prompt`.
+2. Search for `CE: Show Local Stats`.
+3. Run `Developer: Show Running Extensions` and confirm `Certance Token Kit` is listed.
+4. Because activation is `onStartupFinished`, reload the window once after install if the commands do not appear immediately.
+
+If you want to test without installing globally, open only the vscode-extension folder in VS Code and press `F5`. That launches an Extension Development Host using the existing launch config, which is the quickest smoke test before packaging.

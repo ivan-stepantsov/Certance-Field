@@ -1,0 +1,49 @@
+I’m checking the current change in the token kit repo and the failing validation path first so I can identify the highest behavioral risk from the actual diff, not guess from the failure alone.
+
+Ran terminal command:  git -C '.' status --short && git -C '.' --no-pager diff --stat && git -C '.' --no-pager diff -- scripts/validate-direct-answers.js measurement/direct-answer-snapshot.capture.json measurement/direct-answer-validation.md README.md vscode-extension/src/** vscode-extension/test/**
+
+Checked [](file://./scripts/validate-direct-answers.js), no problems found
+
+I have the changed-file list and the diff dump; next I’m reading the exact hunks around the validator and any paired test/docs changes to isolate the user-visible regression risk.
+
+Ran terminal command:  git -C '.' --no-pager diff --unified=80 -- scripts/validate-direct-answers.js
+
+Ran terminal command:  git -C '.' --no-pager diff --unified=80 -- vscode-extension/test '*.md' '*.json'
+
+Read [](file://~/Library/Application%20Support/Code/User/workspaceStorage/cdd6ec27b3aa27722fbedbe2c60e5726/GitHub.copilot-chat/chat-session-resources/4401a9e7-0c09-4ff4-994b-46ad2bd49c37/call_NWefSsv6YpojQBpctHlQ1g8R__vscode-1780573887601/content.txt#1-1), lines 1 to 260
+
+The validator is a new file rather than a small edit, so I’m reading its implementation and the matching tests directly to look for the first place behavior can diverge from the documented contract.
+
+Searched for regex `validate-direct-answers|direct-answer` (`Certance Token Kit` · `{scripts,vscode-extension,test,measurement,README.md,SETUP.md,playbook.md,package.json,profiles,org}/**`), 42 results
+
+Read [](file://./package.json)
+
+Read [](file://./scripts/validate-direct-answers.js)
+
+I’ve narrowed it to the new validator plus its capture format. I’m checking the documented snapshot shape against the actual captured file that failed, because the main risk here is likely a contract mismatch rather than token math.
+
+Ran terminal command:  cd '.' && node scripts/validate-direct-answers.js --snapshot measurement/direct-answer-snapshot.capture.json | head -n 80
+
+Read [](file://./measurement/direct-answer-snapshot.capture.json)
+
+Read [](file://./measurement/direct-answer-validation.md)
+
+The reproduced output shows the validator tolerates missing captures by emitting zero-token review rows. That’s likely the core behavioral gap, so I’m confirming it against the prompt set and any supporting tests before I lock the review.
+
+Ran terminal command:  cd '.' && node scripts/validate-direct-answers.js --snapshot measurement/direct-answer-snapshot.capture.json >/tmp/direct-answer-report.txt; printf 'exit=%s\n' "$?"; tail -n 20 /tmp/direct-answer-report.txt
+
+Searched for regex `validate-direct-answers|Direct-Answer Validation Report|review-risk|setup-guidance` (`Certance Token Kit` · `vscode-extension/test/**`), no results
+
+Read [](file://./measurement/direct-answer-prompt-set.json)
+
+I have the main finding. I’m pulling exact line references for the silent-success path and the documented contract so I can give you a precise review answer instead of a vague warning.
+
+Ran terminal command:  cd '.' && nl -ba scripts/validate-direct-answers.js | sed -n '1,180p'
+
+Ran terminal command:  cd '.' && nl -ba measurement/direct-answer-validation.md | sed -n '1,120p'
+
+Ran terminal command:  cd '.' && nl -ba measurement/direct-answer-prompt-set.json | sed -n '1,140p'
+
+Top behavioral risk: the new validator can report success on an incomplete snapshot, which makes the direct-answer evidence look valid when whole prompts were never captured. In [scripts/validate-direct-answers.js]( ./scripts/validate-direct-answers.js#L48 ) and [scripts/validate-direct-answers.js]( ./scripts/validate-direct-answers.js#L98 ), missing prompt results and missing variants are silently coerced to empty objects, then rendered as 0 tokens and review cells. With the current prompt set in [measurement/direct-answer-prompt-set.json]( ./measurement/direct-answer-prompt-set.json#L17 ) and [measurement/direct-answer-prompt-set.json]( ./measurement/direct-answer-prompt-set.json#L24 ), the supplied capture only covers two prompts, but the command still exits 0 and prints rows for the uncaptured prompts. That contradicts the acceptance rule in [measurement/direct-answer-validation.md]( ./measurement/direct-answer-validation.md#L13 ), so the main failure mode is a false pass, not a noisy report.
+
+Smallest fix: fail fast before rendering if any prompt id from the prompt set is absent from the snapshot, or if any required variant is missing output. The minimal change is around [scripts/validate-direct-answers.js]( ./scripts/validate-direct-answers.js#L82 ): validate prompt coverage and baseline/concise/directDefault presence, print the missing ids or variants, and set a non-zero exit code. That preserves the current report format while preventing incomplete captures from being treated as valid measurement evidence.

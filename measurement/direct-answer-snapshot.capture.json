@@ -1,0 +1,120 @@
+{
+  "results": [
+    {
+      "id": "auth-debug",
+      "variants": {
+        "baseline": {
+          "outputFile": "direct-answer-captures/auth-debug.baseline.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": null,
+          "notes": "Preserves diagnosis, cause pattern, and concrete next check; very verbose."
+        },
+        "concise": {
+          "outputFile": "direct-answer-captures/auth-debug.concise.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": null,
+          "notes": "Keeps the root-cause hypothesis and smallest-fix direction with less overhead."
+        },
+        "directDefault": {
+          "outputFile": "direct-answer-captures/auth-debug.direct-default.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": null,
+          "notes": "Preserves all required signals, but still carries substantial process narration."
+        }
+      }
+    },
+    {
+      "id": "destructive-warning",
+      "variants": {
+        "baseline": {
+          "outputFile": "direct-answer-captures/destructive-warning.baseline.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": true,
+          "notes": "Preserves the stop recommendation, core risk, and safe migration path; still somewhat expanded."
+        },
+        "concise": {
+          "outputFile": "direct-answer-captures/destructive-warning.concise.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": true,
+          "notes": "Keeps the safety stop, concrete risk, and controlled next step with lower output cost."
+        },
+        "directDefault": {
+          "outputFile": "direct-answer-captures/destructive-warning.direct-default.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": true,
+          "notes": "Preserves the full safety signal and stays more direct than the baseline."
+        }
+      }
+    },
+    {
+      "id": "review-risk",
+      "variants": {
+        "baseline": {
+          "outputFile": "direct-answer-captures/review-risk.baseline.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": null,
+          "notes": "Identifies the silent-pass validator risk and a fail-fast fix, but carries heavy process narration."
+        },
+        "concise": {
+          "outputFile": "direct-answer-captures/review-risk.concise.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": null,
+          "notes": "Keeps the top behavioral risk and smallest fix with less overhead than the baseline."
+        },
+        "directDefault": {
+          "outputFile": "direct-answer-captures/review-risk.direct-default.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": null,
+          "notes": "Preserves prioritization and the minimal corrective action, but still includes noticeable work-log narration."
+        }
+      }
+    },
+    {
+      "id": "setup-guidance",
+      "variants": {
+        "baseline": {
+          "outputFile": "direct-answer-captures/setup-guidance.baseline.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": null,
+          "notes": "Preserves the local install path, verification checks, and caveats, but remains somewhat procedural."
+        },
+        "concise": {
+          "outputFile": "direct-answer-captures/setup-guidance.concise.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": null,
+          "notes": "Keeps the core install and verification path with less overhead than the baseline."
+        },
+        "directDefault": {
+          "outputFile": "direct-answer-captures/setup-guidance.direct-default.txt",
+          "keptMainIdea": true,
+          "keptReason": true,
+          "keptNextAction": true,
+          "keptSafety": null,
+          "notes": "Preserves the exact local install path and verification signals, but still carries visible work-log framing."
+        }
+      }
+    }
+  ]
+}
